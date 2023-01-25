@@ -1,20 +1,31 @@
 import { useDispatch } from 'react-redux';
-import css from './SignInForm.module.css';
+import { toast } from 'react-toastify';
 import operations from 'redux/auth/auth-operations';
+import css from './SignInForm.module.css';
+import { useState } from 'react';
+import { Loader } from 'components/Loader/Loader';
 
 export const SignInForm = () => {
   const dispatch = useDispatch();
-
+  const [isSigninForm, setIsSigninForm] = useState(false);
   const handleSubmit = e => {
     e.preventDefault();
     const form = e.currentTarget;
+
+    setIsSigninForm(true);
     dispatch(
       operations.logIn({
         email: form.elements.email.value,
         password: form.elements.password.value,
       })
-    );
-    form.reset();
+    )
+      .then(res => {
+        toast.success(`Welcome back ${res.payload.user.name}👋`);
+      })
+      .finally(() => {
+        setIsSigninForm(false);
+        form.reset();
+      });
   };
 
   return (
@@ -37,11 +48,13 @@ export const SignInForm = () => {
           placeholder="Enter password"
         />
       </label>
-
-      <button className={css.formBtn} type="submit">
-        Sign In
-      </button>
-      <div></div>
+      {isSigninForm ? (
+        <Loader />
+      ) : (
+        <button className={css.formBtn} type="submit">
+          Sign In
+        </button>
+      )}
     </form>
   );
 };

@@ -3,11 +3,16 @@ import css from './ContactForm.module.css';
 import { nanoid } from 'nanoid';
 import { useSelector, useDispatch } from 'react-redux';
 import { addContact } from 'redux/contacts/operations';
-import { selectContacts } from 'redux/contacts/contact-selectors';
+import {
+  selectContacts,
+  selectIsLoading,
+} from 'redux/contacts/contact-selectors';
+import { toast } from 'react-toastify';
 
 export const ContactForm = () => {
   const contacts = useSelector(selectContacts);
   const dispatch = useDispatch();
+  const isLoading = useSelector(selectIsLoading);
 
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
@@ -33,7 +38,7 @@ export const ContactForm = () => {
     );
 
     if (contactInList) {
-      alert(`⚠ Oops... Contact ${name} already in list!`);
+      toast.warn(`🔔 Oops... Contact ${name} already in list!`);
       return;
     }
     const contact = {
@@ -43,6 +48,7 @@ export const ContactForm = () => {
     };
     dispatch(addContact(contact));
     reset();
+    toast.info('New contact was added 👌');
   };
 
   const reset = () => {
@@ -78,7 +84,7 @@ export const ContactForm = () => {
           value={number}
         />
       </label>
-      <button className={css.formBtn} type="submit">
+      <button disabled={isLoading} className={css.formBtn} type="submit">
         Add contact
       </button>
     </form>

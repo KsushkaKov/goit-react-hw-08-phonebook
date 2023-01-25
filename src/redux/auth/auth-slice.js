@@ -1,11 +1,26 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, isAnyOf } from '@reduxjs/toolkit';
 import operations from './auth-operations';
+
+const extraActions = [
+  operations.register,
+  operations.logOut,
+  operations.logIn,
+  operations.refreshCurrentUser,
+];
+const getActions = type => extraActions.map(action => action[type]);
 
 const initialState = {
   user: { name: null, email: null },
   token: null,
   isLoggedIn: false,
   isRefreshUser: false,
+  isLoading: false,
+  error: null,
+};
+
+const handleFulfilled = state => {
+  state.isLoading = false;
+  state.error = null;
 };
 
 const authSlice = createSlice({
@@ -30,9 +45,12 @@ const authSlice = createSlice({
       })
       .addCase(operations.refreshCurrentUser.pending, state => {
         state.isRefreshUser = true;
+        state.isLoading = true;
       })
-      .addCase(operations.refreshCurrentUser.rejected, state => {
+      .addCase(operations.refreshCurrentUser.rejected, (state, { payload }) => {
         state.isRefreshUser = false;
+        state.isLoading = false;
+        state.error = payload;
       })
       .addCase(
         operations.refreshCurrentUser.fulfilled,
@@ -41,7 +59,9 @@ const authSlice = createSlice({
           state.isLoggedIn = true;
           state.isRefreshUser = false;
         }
-      );
+      )
+
+      .addMatcher(isAnyOf(...getActions('fulfilled')), handleFulfilled);
   },
 });
 

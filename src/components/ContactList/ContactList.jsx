@@ -1,11 +1,13 @@
 import css from './ContactList.module.css';
 import { useSelector, useDispatch } from 'react-redux';
+import { selectIsLoading } from 'redux/contacts/contact-selectors';
 import { deleteContact } from 'redux/contacts/operations';
 import { selectVisibleContacts } from 'redux/selectors';
 
 export const ContactList = () => {
   const dispatch = useDispatch();
   const contacts = useSelector(selectVisibleContacts);
+  const isLoading = useSelector(selectIsLoading);
 
   return (
     <>
@@ -15,6 +17,7 @@ export const ContactList = () => {
             <li key={id} className={css.contactListItem}>
               {name} : {number}
               <button
+                disabled={isLoading}
                 type="button"
                 className={css.contactListItemBtn}
                 onClick={() => {
